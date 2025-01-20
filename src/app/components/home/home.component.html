@@ -1,12 +1,25 @@
 <section>
+  @if (isBrowser) {
     <form>
-        <input type="text" placeholder="Filter by city" #filter/>
-        <button class="primary" type="button" (click)="filterResults(filter.value)">Search</button>
+      <input type="text" placeholder="Filter by city" #filter />
+      <button 
+        class="primary" 
+        type="button" 
+        (click)="filterResults(filter.value)">
+        Search
+      </button>
     </form>
-    <section class="results">
+  }
+
+  <section class="results">
+    @if (filteredLocationList.length > 0) {
+      @for (location of filteredLocationList; track location.id) {
         <app-housing-location 
-            *ngFor="let housingLocation of filteredLocationList"
-            [housingLocation]="housingLocation"
-        />
-    </section>
+          [housingLocation]="location">
+        </app-housing-location>
+      }
+    } @else {
+      <p class="no-results">No locations found</p>
+    }
+  </section>
 </section>

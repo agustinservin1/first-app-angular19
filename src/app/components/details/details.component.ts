@@ -5,6 +5,7 @@ import { HousingLocation } from '../housinglocation';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'app-details',
@@ -16,9 +17,10 @@ import { Subject, takeUntil } from 'rxjs';
   
 })
 export class DetailsComponent {
-  private cdr = inject(ChangeDetectorRef);
+  private readonly cdr = inject(ChangeDetectorRef);
   route : ActivatedRoute = inject(ActivatedRoute);
-  housingService = inject(HousingService);
+  private readonly housingService = inject(HousingService);
+  private readonly seoService = inject(SeoService);
 
   housingLocation : HousingLocation | undefined;
   
@@ -29,25 +31,26 @@ export class DetailsComponent {
     lastName: new FormControl('', { nonNullable: true }),
     email: new FormControl('', { nonNullable: true })
   });
-  
   ngOnInit() {
     const housingLocationId = Number(this.route.snapshot.params['id']);
 
     this.housingService.getHousingLocationById(housingLocationId)
       .pipe(
-        takeUntil(this.destroy$) 
+        takeUntil(this.destroy$)
       )
       .subscribe({
         next: (location) => {
           this.housingLocation = location;
-          this.cdr.markForCheck(); 
+          this.cdr.markForCheck();
+          this.seoService.configureDynamicSeoFromHousing(location);
 
         },
         error: (error) => {
-          console.error('Error cargando la ubicación:', error);
+          console.error('Error loading location details:', error);
         }
       });
   }
+
 
   onSubmit() {
     if (this.formAngular.valid && this.housingLocation) {
